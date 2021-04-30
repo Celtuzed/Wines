@@ -1,37 +1,50 @@
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pprint import pprint
+import collections
+import argparse
 import datetime
 import pandas
 
+def get_years_caption(age_of_the_winery):
+    if (age_of_the_winery%10==1) and (age_of_the_winery != 11) and (age_of_the_winery != 111):
+        years_caption = "год"
+    elif (age_of_the_winery%10>1) and (age_of_the_winery%10<5) and (age_of_the_winery!=12) and (age_of_the_winery!=13) and (age_of_the_winery!=14):
+        years_caption = "года"
+    else:
+        years_caption = "лет"
+    return years_caption
 
-menu = {
-    Белые Вина: ""
-    Красные Вина: ""
-}
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Этот код нужен для более комфортного и просто ведения сайта по продаже вин.'
+    )
+    parser.add_argument('file_path', help='Путь к файлу')
+    args = parser.parse_args()
 
-excel_data_df = pandas.read_excel('wine2.xlsx', na_filter=False)
+    wines = pandas.read_excel(args.file_path, na_filter=False).to_dict(orient='record')
+    menu = collections.defaultdict(list)
+    for categories in wines:
+      menu[categories['Категория']].append(categories)
 
-wines = excel_data_df.to_dict(orient='record')
+    now_time = datetime.datetime.now()
+    age_of_the_winery = now_time.year - 1920
 
-pprint(menu)
+    env = Environment(
+        loader=FileSystemLoader('.'),
+        autoescape=select_autoescape(['html', 'xml'])
+    )
 
-now = datetime.datetime.now()
+    template = env.get_template('template.html')
 
-env = Environment(
-    loader=FileSystemLoader('.'),
-    autoescape=select_autoescape(['html', 'xml'])
-)
+    rendered_page = template.render(
+        years_caption=get_years_caption(age_of_the_winery),
+        age_of_the_winery = age_of_the_winery,
+        menu=menu
+    )
 
-template = env.get_template('template.html')
+    with open('index.html', 'w', encoding="utf8") as file:
+        file.write(rendered_page)
 
-rendered_page = template.render(
-    delta_years = now.year - 1920,
-    menu=menu
-)
-
-with open('index.html', 'w', encoding="utf8") as file:
-    file.write(rendered_page)
-
-server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
-server.serve_forever()
+    server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
+    server.serve_forever()

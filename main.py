@@ -1,10 +1,12 @@
-from http.server import HTTPServer, SimpleHTTPRequestHandler
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-from pprint import pprint
-import collections
 import argparse
+import collections
 import datetime
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+from pprint import pprint
+
 import pandas
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
 
 def get_years_caption(age_of_the_winery):
     if (age_of_the_winery%10==1) and (age_of_the_winery != 11) and (age_of_the_winery != 111):

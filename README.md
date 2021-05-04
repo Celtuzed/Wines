@@ -6,11 +6,11 @@
 
 - Скачайте код
 - Загрузите библиотеки командой
-```Python
+```bash
 pip install -r requirements.txt
 ```
 - Запустите сайт командой
-```Python
+```bash
 python3 main.py (Путь к excel файлу)
 ```
   Как пример можете использовать файл `wines_and_drinks.xlsx`
